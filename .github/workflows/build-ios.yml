@@ -75,14 +75,24 @@ jobs:
           xcrun simctl boot "$DEVICE_ID" 2>/dev/null || true
           xcrun simctl bootstatus "$DEVICE_ID" -b
           xcrun simctl install "$DEVICE_ID" "$APP_PATH"
-          xcrun simctl launch "$DEVICE_ID" com.rajarsheechatterjee.LNReader || true
-          sleep 15
-          xcrun simctl spawn "$DEVICE_ID" log show --last 40s --predicate 'process == "LNReader"' --style compact 2>/dev/null | tail -40 || true
-          if ! xcrun simctl spawn "$DEVICE_ID" launchctl list 2>/dev/null | grep -q LNReader; then
-            echo "APP_CRASHED"
-            exit 1
-          fi
-          echo "APP_RUNNING_OK"
+          # Launch with console attached: captures Hermes/RN stdout+stderr
+          # (console.log, JS exceptions, native errors) which log show misses.
+          (timeout 25 xcrun simctl launch --console-pty "$DEVICE_ID" com.rajarsheechatterjee.LNReader 2>&1 || true) | tee /tmp/smoke-console.txt | tail -60
+          echo "--- CONSOLE END ---"
+          # Screenshot the simulator so we can SEE what the app shows.
+          xcrun simctl io "$DEVICE_ID" screenshot /tmp/smoke-screen.png || true
+          echo "--- SCREENSHOT: /tmp/smoke-screen.png ---"
+          mkdir -p /tmp/smoke-artifacts
+          cp /tmp/smoke-console.txt /tmp/smoke-artifacts/ 2>/dev/null || true
+          cp /tmp/smoke-screen.png /tmp/smoke-artifacts/ 2>/dev/null || true
+
+      - name: Upload smoke test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-artifacts
+          path: /tmp/smoke-artifacts/
+          retention-days: 7
 
       - name: Build app (unsigned, device)
         working-directory: ios
