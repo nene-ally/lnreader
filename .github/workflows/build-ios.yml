@@ -33,6 +33,11 @@ jobs:
       - name: Expo prebuild (iOS)
         run: npx expo prebuild --platform ios --clean --no-install
 
+      - name: Patch Podfile for Google Sign-In compatibility
+        working-directory: ios
+        run: |
+          sed -i '' '1s/^/use_modular_headers!\n/' Podfile
+
       - name: Install Pods
         working-directory: ios
         run: pod install --repo-update
