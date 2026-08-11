@@ -321,6 +321,8 @@ const SettingsWebView = () => {
       ref={webViewRef}
       style={{ backgroundColor: settings.theme }}
       allowFileAccess={true}
+      allowFileAccessFromFileURLs={true}
+      allowUniversalAccessFromFileURLs={true}
       originWhitelist={['*']}
       scalesPageToFit={true}
       showsVerticalScrollIndicator={false}

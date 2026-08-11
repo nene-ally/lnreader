@@ -97,8 +97,46 @@ public class NativeFileModule: Module {
     }
 
     AsyncFunction("downloadFile") { (url: String, destPath: String, method: String, headers: [String: String], body: String?, promise: Promise) in
-      // Stub — download implementation not ported for iOS
-      promise.reject("NOT_IMPLEMENTED", "downloadFile is not implemented on iOS")
+      guard let downloadURL = URL(string: url) else {
+        promise.reject("INVALID_URL", "Invalid URL: \(url)")
+        return
+      }
+      var request = URLRequest(url: downloadURL)
+      request.httpMethod = method.isEmpty ? "GET" : method.uppercased()
+      for (key, value) in headers {
+        request.setValue(value, forHTTPHeaderField: key)
+      }
+      if let body {
+        request.httpBody = body.data(using: .utf8)
+      }
+      // Ensure the destination directory exists.
+      let fileManager = FileManager.default
+      let destDir = (destPath as NSString).deletingLastPathComponent
+      try? fileManager.createDirectory(atPath: destDir, withIntermediateDirectories: true)
+
+      URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error {
+          promise.reject("DOWNLOAD_FAILED", error.localizedDescription)
+          return
+        }
+        guard let data, let response = response as? HTTPURLResponse else {
+          promise.reject("DOWNLOAD_FAILED", "No data received")
+          return
+        }
+        guard (200..<300).contains(response.statusCode) else {
+          promise.reject(
+            "HTTP_ERROR",
+            "HTTP \(response.statusCode) for \(url)"
+          )
+          return
+        }
+        do {
+          try data.write(to: URL(fileURLWithPath: destPath), options: .atomic)
+          promise.resolve()
+        } catch {
+          promise.reject("WRITE_FAILED", error.localizedDescription)
+        }
+      }.resume()
     }
 
     Constant("DocumentDirectoryPath") {
