@@ -1,4 +1,4 @@
-import { StatusBar, StyleSheet } from 'react-native';
+import { Platform, StatusBar, StyleSheet } from 'react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import WebView from 'react-native-webview';
 
@@ -230,6 +230,8 @@ const SettingsReaderWebView = ({
         }
       }}
       source={{
+        // iOS: file baseUrl so WKWebView allows loading in-bundle css/fonts.
+        baseUrl: Platform.OS === 'ios' ? getAssetsUriPrefix() + '/' : undefined,
         html: `
             <html>
               <head>

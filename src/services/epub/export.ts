@@ -1,5 +1,5 @@
 import NativeFile from '@modules/native-file';
-import { epub } from '@modules/nitro-epub';
+import { getEpub } from '@modules/nitro-epub';
 
 import { getString } from '@i18n/translations';
 import type {
@@ -37,7 +37,11 @@ export const exportEpub = async (
       progressText: getString('novelScreen.epub.preparingExport'),
     }));
 
-    const result = await epub.exportEpub(
+    const epubInstance = getEpub();
+    if (!epubInstance) {
+      throw new Error('EPUB exporter unavailable on this platform');
+    }
+    const result = await epubInstance.exportEpub(
       metadata,
       chapters,
       tempEpubPath,

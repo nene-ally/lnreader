@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef } from 'react';
-import { NativeEventEmitter, NativeModules, StatusBar } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform, StatusBar } from 'react-native';
 import WebView from 'react-native-webview';
 import color from 'color';
 import { getString } from '@i18n/translations';
@@ -214,6 +214,8 @@ const SettingsWebView = () => {
 
   const webViewSource = useMemo(
     () => ({
+      // iOS: file baseUrl so WKWebView allows loading in-bundle css/fonts.
+      baseUrl: Platform.OS === 'ios' ? getAssetsUriPrefix() + '/' : undefined,
       html: `
             <html >
               <head>

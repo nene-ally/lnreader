@@ -24,6 +24,7 @@ export const getAssetsUriPrefix = (): string => {
     const bundleDir = scriptURL.replace(/[^/]*$/, '');
     return `file://${bundleDir}assets/reader`;
   }
-  // Fallback: standard iOS simulator/device bundle path.
+  // Fallback: standard iOS simulator/device bundle path. Note: a broken
+  // scriptURL here means reader css/fonts will 404 — check the value above.
   return 'file:///';
 };

@@ -15,7 +15,7 @@ import type {
 } from '@services/backgroundTasks/contracts';
 import NativeFile from '@modules/native-file';
 import NativeZipArchive from '@modules/native-zip-archive';
-import { epub } from '@modules/nitro-epub';
+import { getEpub } from '@modules/nitro-epub';
 import { showToast } from '@utils/showToast';
 
 const decodePath = (path: string) => {
@@ -136,7 +136,10 @@ export const importEpub = async (
     await NativeFile.copyFile(uri, epubFilePath);
     await NativeZipArchive.unzip(epubFilePath, epubDirPath);
 
-    const novel = await epub.parseNovelAndChapters(epubDirPath);
+    const novel = await getEpub()?.parseNovelAndChapters(epubDirPath);
+    if (!novel) {
+      throw new Error('EPUB parser unavailable on this platform');
+    }
     if (!novel.name) {
       novel.name = filename.replace('.epub', '') || 'Untitled';
     }

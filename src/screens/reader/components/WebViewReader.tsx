@@ -311,7 +311,15 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     // eslint-disable-next-line react-hooks/refs
     const isNextChapterScreenVisible = nextChapterScreenVisible.current;
     return {
-      baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
+      // iOS WKWebView rejects file:// subresource loads (css/fonts) unless the
+      // page has a file:// baseUrl granting read access. For downloaded
+      // chapters (no remote base), point at the in-bundle reader assets dir.
+      baseUrl:
+        Platform.OS === 'ios' && chapter.isDownloaded
+          ? getAssetsUriPrefix() + '/'
+          : !chapter.isDownloaded
+            ? plugin?.site
+            : undefined,
       headers: plugin?.imageRequestInit?.headers,
       method: plugin?.imageRequestInit?.method,
       body: plugin?.imageRequestInit?.body,
