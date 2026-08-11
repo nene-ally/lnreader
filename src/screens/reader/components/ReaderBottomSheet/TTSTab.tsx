@@ -3,7 +3,7 @@ import { Pressable, View, StyleSheet, Text, ScrollView } from 'react-native';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Dialog, List, Slider } from '@components';
 import { getLocales } from 'expo-localization';
-import { Tts, TtsEngine, TtsVoice } from '@modules/nitro-tts';
+import { getTts, TtsEngine, TtsVoice } from '@modules/nitro-tts';
 import {
   useTheme,
   useChapterGeneralSettings,
@@ -302,7 +302,7 @@ const TTSTab: React.FC = () => {
 
   // Android only; resolves empty on iOS, which hides the Engine row below.
   useEffect(() => {
-    Tts.getEngines().then(res => {
+    getTts()?.getEngines().then(res => {
       setEngines([...res].sort((a, b) => a.label.localeCompare(b.label)));
     });
   }, []);
@@ -310,7 +310,7 @@ const TTSTab: React.FC = () => {
   // Voices belong to a specific engine, so refetch whenever it changes.
   const engineName = tts?.engine?.name;
   useEffect(() => {
-    Tts.getVoices(engineName).then(res => {
+    getTts()?.getVoices(engineName).then(res => {
       setVoices([...res].sort((a, b) => a.name.localeCompare(b.name)));
     });
   }, [engineName]);

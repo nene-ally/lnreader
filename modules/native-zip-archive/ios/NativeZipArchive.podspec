@@ -12,5 +12,12 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
 
-  s.source_files = "**/*.{h,m,swift}"
+  s.source_files = "**/*.{h,m,mm,swift}"
+  # Swift → ObjC++ bridge
+  s.preserve_paths = "NativeZipArchiveHelper.h"
+  s.pod_target_xcconfig = {
+    'SWIFT_OBJC_BRIDGING_HEADER' => '$(PODS_TARGET_SRCROOT)/NativeZipArchiveHelper.h',
+    'OTHER_LDFLAGS' => '-larchive',
+    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17'
+  }
 end

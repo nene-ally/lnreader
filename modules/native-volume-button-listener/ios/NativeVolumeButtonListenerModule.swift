@@ -6,5 +6,10 @@ public class NativeVolumeButtonListenerModule: Module {
     Name("NativeVolumeButtonListener")
 
     Events("VolumeUp", "VolumeDown")
+
+    Function("setActive") { (active: Bool) in
+      // iOS volume keys are controlled by the system; nothing to activate.
+      // Kept as a no-op so the JS API never throws on iOS.
+    }
   }
 }

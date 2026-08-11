@@ -1,9 +1,44 @@
 import ExpoModulesCore
 import Foundation
+import UIKit
 
 public class NativeFileModule: Module {
   public func definition() -> ModuleDefinition {
     Name("NativeFile")
+
+    AsyncFunction("createDocument") { (filename: String, mimeType: String) -> String in
+      // iOS has no SAF "create file at user-chosen location" flow; the backup
+      // task writes asynchronously to the returned path, so it must be
+      // immediately writable. Use the app's Documents dir, which is visible
+      // in the system Files app when UIFileSharingEnabled is set.
+      let docs = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first ?? NSTemporaryDirectory()
+      let dest = (docs as NSString).appendingPathComponent(filename)
+      if !FileManager.default.fileExists(atPath: dest) {
+        FileManager.default.createFile(atPath: dest, contents: nil)
+      }
+      return dest
+    }
+
+    AsyncFunction("pickDocument") { (mimeType: String, promise: Promise) in
+      let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.item])
+      picker.modalPresentationStyle = .fullScreen
+      picker.allowsMultipleSelection = false
+      NativeFileModule.presentPicker(picker) { url in
+        promise.resolve(url.path)
+      }
+    }
+
+    AsyncFunction("pickDirectory") { (promise: Promise) in
+      let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
+      picker.modalPresentationStyle = .fullScreen
+      picker.allowsMultipleSelection = false
+      NativeFileModule.presentPicker(picker) { url in
+        // Ask the system to keep access to this folder so writes succeed later.
+        let didStart = url.startAccessingSecurityScopedResource()
+        promise.resolve(["uri": url.path, "name": url.lastPathComponent])
+        _ = didStart
+      }
+    }
 
     Function("writeFile") { (path: String, content: String) in
       try content.write(toFile: path, atomically: true, encoding: .utf8)
@@ -152,6 +187,47 @@ public class NativeFileModule: Module {
     Constant("ExternalCachesDirectoryPath") {
       let paths = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)
       return paths.first ?? ""
+    }
+  }
+
+  // MARK: - Document picker helpers
+
+  private static var pickerDelegate: PickerDelegate?
+
+  static func presentPicker(_ picker: UIDocumentPickerViewController, completion: @escaping (URL) -> Void) {
+    let delegate = PickerDelegate()
+    delegate.onPick = completion
+    pickerDelegate = delegate
+    picker.delegate = delegate
+    DispatchQueue.main.async {
+      topViewController()?.present(picker, animated: true)
+    }
+  }
+
+  static func topViewController() -> UIViewController? {
+    guard let windowScene = UIApplication.shared.connectedScenes
+      .compactMap({ $0 as? UIWindowScene })
+      .first(where: { $0.activationState == .foregroundActive })
+    else { return nil }
+    var top = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController
+    while let presented = top?.presentedViewController {
+      top = presented
+    }
+    return top
+  }
+
+  private class PickerDelegate: NSObject, UIDocumentPickerDelegate {
+    var onPick: ((URL) -> Void)?
+
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+      if let url = urls.first {
+        onPick?(url)
+      }
+      NativeFileModule.pickerDelegate = nil
+    }
+
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+      NativeFileModule.pickerDelegate = nil
     }
   }
 }

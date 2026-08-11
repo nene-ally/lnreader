@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  Tts,
+  getTts,
   TtsMetadata,
   TtsPlaybackState,
   TtsProgress,
@@ -31,7 +31,11 @@ export const useTtsSession = () => {
       return sessionRef.current;
     }
     if (!sessionPromiseRef.current) {
-      sessionPromiseRef.current = Tts.createSession()
+      const tts = getTts();
+      if (!tts) {
+        throw new Error('TTS is not available on this platform');
+      }
+      sessionPromiseRef.current = tts.createSession()
         .then(session => {
           if (!mountedRef.current) {
             void session.stop();

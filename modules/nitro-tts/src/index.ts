@@ -1,7 +1,20 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import type { TtsFactory } from './specs/TtsFactory.nitro';
 
-export const Tts = NitroModules.createHybridObject<TtsFactory>('TtsFactory');
+// Lazily resolve; module-scope createHybridObject would throw and kill the
+// whole bundle if the native side failed to register.
+let cachedTts: TtsFactory | null | undefined;
+
+export function getTts(): TtsFactory | null {
+  if (cachedTts === undefined) {
+    try {
+      cachedTts = NitroModules.createHybridObject<TtsFactory>('TtsFactory');
+    } catch {
+      cachedTts = null;
+    }
+  }
+  return cachedTts;
+}
 
 export type { TtsFactory } from './specs/TtsFactory.nitro';
 export type { TtsSession } from './specs/TtsSession.nitro';
