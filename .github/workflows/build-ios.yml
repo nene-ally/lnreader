@@ -45,6 +45,7 @@ jobs:
       - name: Build app (unsigned)
         working-directory: ios
         run: |
+          set -ex
           xcodebuild \
             -workspace LNReader.xcworkspace \
             -scheme LNReader \
@@ -58,7 +59,7 @@ jobs:
             DEVELOPMENT_TEAM="" \
             PROVISIONING_PROFILE="" \
             PROVISIONING_PROFILE_SPECIFIER="" \
-            bundle_archive
+            build
 
       - name: Package IPA
         run: |
