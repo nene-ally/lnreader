@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Remove dev-only dependencies for production build
+        run: pnpm remove expo-dev-client
+
       - name: Generate env file
         run: node scripts/generate-env-file.cjs --build-type Release
 
