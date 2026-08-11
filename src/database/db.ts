@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { Platform } from 'react-native';
 import { drizzle } from 'drizzle-orm/op-sqlite';
 
 import { schema } from './schema';
@@ -25,7 +26,14 @@ class MyLogger implements Logger {
 }
 
 const DB_NAME = 'lnreader.db';
-const _db = open({ name: DB_NAME, location: '../files/SQLite' });
+// Android resolves this relative to /data/data/<pkg>/databases → files/SQLite.
+// iOS mounts the app container root read-only; op-sqlite's default base path
+// there is the Library directory, so a relative '../files/SQLite' would point
+// outside the writable area and make open() throw, stalling app startup.
+// Omit location on iOS → op-sqlite uses its platform default (Library).
+const _db = open(
+  Platform.OS === 'ios' ? { name: DB_NAME } : { name: DB_NAME, location: '../files/SQLite' },
+);
 
 const INITIAL_MIGRATION_NAME = '20251222152612_past_mandrill';
 const INITIAL_MIGRATION_CREATED_AT = 1766417172000;

@@ -24,6 +24,7 @@ import {
 } from '@hooks/persisted/useSettings';
 import { getBatteryLevel } from 'react-native-device-info';
 import { PLUGIN_STORAGE } from '@utils/Storages';
+import { getAssetsUriPrefix } from '@utils/readerAssets';
 import { useChapterContext } from '../ChapterContext';
 import { ReaderSearchResult } from '../types';
 import { useTtsSession } from '../hooks/useTtsSession';
@@ -117,9 +118,7 @@ const deviceInfoEmitter = new NativeEventEmitter(RNDeviceInfo);
  */
 let lastKnownBatteryLevel = 0;
 
-const assetsUriPrefix = __DEV__
-  ? 'http://localhost:8081/assets'
-  : 'file:///android_asset';
+const assetsUriPrefix = getAssetsUriPrefix();
 
 const WebViewReader: React.FC<WebViewReaderProps> = ({
   onPress,
@@ -359,7 +358,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                 <style id="ln-font">
                 @font-face {
                   font-family: ${initialReaderSettings.fontFamily};
-                  src: url("file:///android_asset/fonts/${
+                  src: url("${assetsUriPrefix}/fonts/${
                     initialReaderSettings.fontFamily
                   }.ttf");
                 }

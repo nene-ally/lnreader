@@ -4,6 +4,7 @@ import WebView from 'react-native-webview';
 import color from 'color';
 import { getString } from '@i18n/translations';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
+import { getAssetsUriPrefix } from '@utils/readerAssets';
 import {
   CHAPTER_GENERAL_SETTINGS,
   CHAPTER_READER_SETTINGS,
@@ -34,9 +35,7 @@ const onLogMessage = (payload: { nativeEvent: { data: string } }) => {
 const { RNDeviceInfo } = NativeModules;
 const deviceInfoEmitter = new NativeEventEmitter(RNDeviceInfo);
 
-const assetsUriPrefix = __DEV__
-  ? 'http://localhost:8081/assets'
-  : 'file:///android_asset';
+const assetsUriPrefix = getAssetsUriPrefix();
 
 const novel = {
   'artist': null,
@@ -178,7 +177,7 @@ const SettingsWebView = () => {
     }
     @font-face {
       font-family: ${settings.fontFamily};
-      src: url("file:///android_asset/fonts/${settings.fontFamily}.ttf");
+      src: url("${assetsUriPrefix}/fonts/${settings.fontFamily}.ttf");
     }
     </style>
     <link rel="stylesheet" href="${assetsUriPrefix}/css/index.css">

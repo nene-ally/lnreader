@@ -50,7 +50,15 @@ export class BackgroundTaskQueue {
   }
 
   async refresh() {
-    const records = await NativeBackgroundTasks.getTasks();
+    let records: NativeBackgroundTaskRecord[] = [];
+    try {
+      records = await NativeBackgroundTasks.getTasks();
+    } catch {
+      // Background tasks are Android-only; on other platforms the native
+      // module may reject. Treat as an empty queue rather than failing
+      // service initialization.
+      records = [];
+    }
     const queue = records
       .filter(record => ACTIVE_BACKGROUND_TASK_STATES.has(record.state))
       .map(fromNativeTaskRecord);

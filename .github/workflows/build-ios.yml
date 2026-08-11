@@ -45,7 +45,45 @@ jobs:
         working-directory: ios
         run: pod install --repo-update
 
-      - name: Build app (unsigned)
+      - name: Build app (unsigned, simulator)
+        working-directory: ios
+        run: |
+          set -ex
+          xcodebuild \
+            -workspace LNReader.xcworkspace \
+            -scheme LNReader \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            build
+
+      - name: Smoke test app launch on simulator
+        run: |
+          set -ex
+          APP_PATH=$(find ios/build/Build/Products/Release-iphonesimulator -name "*.app" -maxdepth 1 | head -1)
+          echo "APP_PATH=$APP_PATH"
+          DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); devs=[dev for runtime,devices in d["devices"].items() for dev in devices if dev["isAvailable"]]; print(devs[0]["udid"])')
+          echo "Booting simulator $DEVICE_ID"
+          xcrun simctl boot "$DEVICE_ID" 2>/dev/null || true
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          xcrun simctl install "$DEVICE_ID" "$APP_PATH"
+          xcrun simctl launch "$DEVICE_ID" com.rajarsheechatterjee.LNReader || true
+          sleep 15
+          xcrun simctl spawn "$DEVICE_ID" log show --last 40s --predicate 'process == "LNReader"' --style compact 2>/dev/null | tail -40 || true
+          if xcrun simctl spawn "$DEVICE_ID" launchctl list 2>/dev/null | grep -i LNReader; then
+            echo "APP_RUNNING_OK"
+          else
+            echo "APP_CRASHED"
+          fi
+
+      - name: Build app (unsigned, device)
         working-directory: ios
         run: |
           set -ex
@@ -55,7 +93,7 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -destination "generic/platform=iOS" \
-            -derivedDataPath build \
+            -derivedDataPath build-device \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -66,13 +104,19 @@ jobs:
 
       - name: Package IPA
         run: |
-          APP_PATH=$(find ios/build/Build/Products/Release-iphoneos -name "*.app" -maxdepth 1 | head -1)
+          set -ex
+          APP_PATH=$(find ios/build-device/Build/Products/Release-iphoneos -name "*.app" -maxdepth 1 | head -1)
           if [ -z "$APP_PATH" ]; then
             echo "No .app found"
             exit 1
           fi
           mkdir -p Payload
           cp -r "$APP_PATH" Payload/
+          mkdir -p "Payload/LNReader.app/assets/reader"
+          cp -r assets/reader/css "Payload/LNReader.app/assets/reader/" 2>/dev/null || true
+          cp -r assets/reader/js "Payload/LNReader.app/assets/reader/" 2>/dev/null || true
+          cp -r assets/reader/fonts "Payload/LNReader.app/assets/reader/" 2>/dev/null || true
+          find Payload/LNReader.app/assets/reader -type f | head -5
           zip -r LNReader-ios-unsigned.ipa Payload
           rm -rf Payload
 
