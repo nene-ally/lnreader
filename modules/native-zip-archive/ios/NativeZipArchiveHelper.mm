@@ -4,9 +4,7 @@
 #import <sys/stat.h>
 #import <dirent.h>
 
-@implementation NativeZipArchiveHelper
-
-+ (BOOL)unzipFileAtPath:(NSString *)zipPath toDirectory:(NSString *)destDir error:(NSError **)error {
+BOOL NativeZipArchiveUnzipFile(NSString *zipPath, NSString *destDir, NSError **error) {
   struct archive *a = archive_read_new();
   archive_read_support_format_zip(a);
   archive_read_support_filter_all(a);
@@ -75,24 +73,7 @@
   return YES;
 }
 
-+ (BOOL)createZipAtPath:(NSString *)zipPath fromDirectory:(NSString *)srcDir error:(NSError **)error {
-  struct archive *a = archive_write_new();
-  archive_write_set_format_zip(a);
-  int r = archive_write_open_filename(a, zipPath.UTF8String);
-  if (r != ARCHIVE_OK) {
-    if (error) *error = [NSError errorWithDomain:@"NativeZipArchive" code:r userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithUTF8String:archive_error_string(a)]}];
-    archive_write_free(a);
-    return NO;
-  }
-
-  BOOL ok = [self addDirectory:srcDir toArchive:a basePath:srcDir error:error];
-
-  archive_write_close(a);
-  archive_write_free(a);
-  return ok;
-}
-
-+ (BOOL)addDirectory:(NSString *)dir toArchive:(struct archive *)a basePath:(NSString *)basePath error:(NSError **)error {
+static BOOL addDirectoryToArchive(NSString *dir, struct archive *a, NSString *basePath, NSError **error) {
   NSFileManager *fm = [NSFileManager defaultManager];
   NSArray *items = [fm contentsOfDirectoryAtPath:dir error:nil];
   for (NSString *item in items) {
@@ -100,7 +81,7 @@
     BOOL isDir = NO;
     [fm fileExistsAtPath:full isDirectory:&isDir];
     if (isDir) {
-      [self addDirectory:full toArchive:a basePath:basePath error:error];
+      if (!addDirectoryToArchive(full, a, basePath, error)) return NO;
       continue;
     }
     NSString *relative = [full substringFromIndex:basePath.length + 1];
@@ -128,4 +109,17 @@
   return YES;
 }
 
-@end
+BOOL NativeZipArchiveCreateZip(NSString *zipPath, NSString *srcDir, NSError **error) {
+  struct archive *a = archive_write_new();
+  archive_write_set_format_zip(a);
+  int r = archive_write_open_filename(a, zipPath.UTF8String);
+  if (r != ARCHIVE_OK) {
+    if (error) *error = [NSError errorWithDomain:@"NativeZipArchive" code:r userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithUTF8String:archive_error_string(a)]}];
+    archive_write_free(a);
+    return NO;
+  }
+  BOOL ok = addDirectoryToArchive(srcDir, a, srcDir, error);
+  archive_write_close(a);
+  archive_write_free(a);
+  return ok;
+}

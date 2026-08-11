@@ -1,8 +1,13 @@
 #import <Foundation/Foundation.h>
 
-@interface NativeZipArchiveHelper : NSObject
+// C API — Swift imports via the module map, no bridging header needed.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-+ (BOOL)unzipFileAtPath:(NSString *)zipPath toDirectory:(NSString *)destDir error:(NSError **)error;
-+ (BOOL)createZipAtPath:(NSString *)zipPath fromDirectory:(NSString *)srcDir error:(NSError **)error;
+BOOL NativeZipArchiveUnzipFile(NSString *zipPath, NSString *destDir, NSError **error);
+BOOL NativeZipArchiveCreateZip(NSString *zipPath, NSString *srcDir, NSError **error);
 
-@end
+#ifdef __cplusplus
+}
+#endif

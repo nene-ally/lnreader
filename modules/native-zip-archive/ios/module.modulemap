@@ -1,0 +1,5 @@
+framework module NativeZipArchiveHelper {
+  umbrella header "NativeZipArchiveHelper.h"
+  export *
+  module * { export * }
+}

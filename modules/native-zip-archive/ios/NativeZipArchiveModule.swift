@@ -1,6 +1,9 @@
 import ExpoModulesCore
 import Foundation
 
+// Imported via module map (NativeZipArchiveHelper.h), no bridging header.
+import NativeZipArchiveHelper
+
 public class NativeZipArchiveModule: Module {
   public func definition() -> ModuleDefinition {
     Name("NativeZipArchive")
@@ -9,7 +12,7 @@ public class NativeZipArchiveModule: Module {
       do {
         try FileManager.default.createDirectory(atPath: distDirPath, withIntermediateDirectories: true)
         var error: NSError?
-        let ok = NativeZipArchiveHelper.unzipFile(atPath: sourceFilePath, toDirectory: distDirPath, error: &error)
+        let ok = NativeZipArchiveUnzipFile(sourceFilePath, distDirPath, &error)
         if ok {
           promise.resolve()
         } else {
@@ -25,7 +28,7 @@ public class NativeZipArchiveModule: Module {
         try? FileManager.default.removeItem(atPath: zipFilePath)
       }
       var error: NSError?
-      let ok = NativeZipArchiveHelper.createZip(atPath: zipFilePath, fromDirectory: sourceDirPath, error: &error)
+      let ok = NativeZipArchiveCreateZip(zipFilePath, sourceDirPath, &error)
       if ok {
         promise.resolve()
       } else {
