@@ -94,8 +94,9 @@ export const exportEpub = async (
     // iOS: pop the share sheet so the user can Save to Files / AirDrop.
     // Android uses SAF (user already picked the destination).
     if (Platform.OS === 'ios') {
-      const filePath = copyResult.uri.replace(/^file:\/\//, '');
-      await NativeFile.shareFile(filePath);
+      // Pass the full uri; shareFile decodes percent-encoding (spaces in
+      // filenames → %20 in absoluteString).
+      await NativeFile.shareFile(copyResult.uri);
     }
 
     const completionText = getString('novelScreen.epub.exportSuccess', {

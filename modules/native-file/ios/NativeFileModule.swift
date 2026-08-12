@@ -13,7 +13,14 @@ public class NativeFileModule: Module {
           promise.reject("NO_VIEW_CONTROLLER", "No active view controller")
           return
         }
-        let url = URL(fileURLWithPath: filePath)
+        let url: URL
+        if filePath.hasPrefix("file://") {
+          // URI from copyFileToDirectory may be percent-encoded (spaces →
+          // %20); URL(string:) decodes it.
+          url = URL(string: filePath) ?? URL(fileURLWithPath: filePath)
+        } else {
+          url = URL(fileURLWithPath: filePath)
+        }
         let controller = UIActivityViewController(
           activityItems: [url], applicationActivities: nil)
         controller.completionWithItemsHandler = { _, _, _, _ in
