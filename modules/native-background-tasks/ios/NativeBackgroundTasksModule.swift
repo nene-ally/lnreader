@@ -26,13 +26,13 @@ public class NativeBackgroundTasksModule: Module {
     AsyncFunction("fail") { (taskId: String, error: String, shouldRetry: Bool) in }
 
     AsyncFunction("scheduleLibraryUpdates") { (intervalHours: Double, title: String, description: String) in
-      throw NSError(domain: "NativeBackgroundTasks", code: 1, userInfo: [NSLocalizedDescriptionKey: "Scheduled library updates not available on iOS"])
+      // No-op: no BGTaskScheduler on iOS. Settings save without error.
     }
 
     AsyncFunction("cancelLibraryUpdates") { }
 
     AsyncFunction("scheduleAutomaticBackups") { (intervalHours: Double, title: String, description: String, directoryUri: String) in
-      throw NSError(domain: "NativeBackgroundTasks", code: 1, userInfo: [NSLocalizedDescriptionKey: "Scheduled automatic backups not available on iOS"])
+      // No-op: see scheduleLibraryUpdates.
     }
 
     AsyncFunction("cancelAutomaticBackups") { }

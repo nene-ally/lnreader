@@ -142,23 +142,24 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
       />
       <ScrollView style={styles.paddingBottom}>
         <List.Section>
-          <List.SubHeader theme={theme}>
-            {getString('backupScreen.remoteBackup')}
-          </List.SubHeader>
-          <List.Item
-            title={getString('backupScreen.selfHost')}
-            description={getString('backupScreen.selfHostDesc')}
-            theme={theme}
-            onPress={openSelfHostModal}
-          />
-
           {Platform.OS === 'android' ? (
-            <List.Item
-              title={getString('backupScreen.googeDrive')}
-              description={getString('backupScreen.googeDriveDesc')}
-              theme={theme}
-              onPress={openGoogleDriveModal}
-            />
+            <>
+              <List.SubHeader theme={theme}>
+                {getString('backupScreen.remoteBackup')}
+              </List.SubHeader>
+              <List.Item
+                title={getString('backupScreen.selfHost')}
+                description={getString('backupScreen.selfHostDesc')}
+                theme={theme}
+                onPress={openSelfHostModal}
+              />
+              <List.Item
+                title={getString('backupScreen.googeDrive')}
+                description={getString('backupScreen.googeDriveDesc')}
+                theme={theme}
+                onPress={openGoogleDriveModal}
+              />
+            </>
           ) : null}
           <List.SubHeader theme={theme}>
             {getString('backupScreen.localBackup')}

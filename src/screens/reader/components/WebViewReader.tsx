@@ -23,7 +23,7 @@ import {
   initialChapterReaderSettings,
 } from '@hooks/persisted/useSettings';
 import { getBatteryLevel } from 'react-native-device-info';
-import { PLUGIN_STORAGE } from '@utils/Storages';
+import { NOVEL_STORAGE, PLUGIN_STORAGE } from '@utils/Storages';
 import { getAssetsUriPrefix } from '@utils/readerAssets';
 import {
   READER_CSS_INDEX,
@@ -326,7 +326,12 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     const isNextChapterScreenVisible = nextChapterScreenVisible.current;
     return {
       // Keep the chapter's remote base so relative image URLs resolve.
-      baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
+      // Downloaded chapters embed file:// image paths; give the page a
+      // file:// base so WKWebView's file→file access (allowFileAccessFromFileURLs)
+      // applies. Online chapters keep the remote base for relative images.
+      baseUrl: chapter.isDownloaded
+        ? `file://${NOVEL_STORAGE}/${novel.pluginId}/${novel.id}/${chapter.id}/`
+        : plugin?.site,
       headers: plugin?.imageRequestInit?.headers,
       method: plugin?.imageRequestInit?.method,
       body: plugin?.imageRequestInit?.body,

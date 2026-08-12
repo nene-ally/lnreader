@@ -46,6 +46,9 @@ public class NativeFileModule: Module {
       picker.modalPresentationStyle = .fullScreen
       picker.allowsMultipleSelection = false
       NativeFileModule.presentPicker(picker) { url in
+        // Files-app picked URLs are security-scoped; keep access alive so
+        // later readFile/copyFile calls don't hit EACCES.
+        _ = url.startAccessingSecurityScopedResource()
         promise.resolve(url.path)
       }
     }
@@ -71,7 +74,13 @@ public class NativeFileModule: Module {
     }
 
     Function("copyFile") { (sourcePath: String, destPath: String) in
-      try FileManager.default.copyItem(atPath: sourcePath, toPath: destPath)
+      let stripFileScheme = { (p: String) -> String in
+        p.hasPrefix("file://") ? String(p.dropFirst(7)) : p
+      }
+      try FileManager.default.copyItem(
+        atPath: stripFileScheme(sourcePath),
+        toPath: stripFileScheme(destPath),
+      )
     }
 
     AsyncFunction("copyFileToDirectory") { (sourcePath: String, directoryUri: String, fileName: String, mimeType: String, replace: Bool) -> [String: Any] in
@@ -124,7 +133,13 @@ public class NativeFileModule: Module {
     }
 
     Function("moveFile") { (sourcePath: String, destPath: String) in
-      try FileManager.default.moveItem(atPath: sourcePath, toPath: destPath)
+      let stripFileScheme = { (p: String) -> String in
+        p.hasPrefix("file://") ? String(p.dropFirst(7)) : p
+      }
+      try FileManager.default.moveItem(
+        atPath: stripFileScheme(sourcePath),
+        toPath: stripFileScheme(destPath),
+      )
     }
 
     Function("exists") { (filePath: String) in
