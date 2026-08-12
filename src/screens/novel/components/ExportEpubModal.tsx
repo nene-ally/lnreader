@@ -137,6 +137,8 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
   };
 
   const openFolderPicker = async () => {
+    // Android-only: iOS exports to Documents + share sheet automatically.
+    if (Platform.OS !== 'android') return;
     try {
       const result = await NativeFile.pickDirectory();
       setUri(result.uri);
@@ -162,36 +164,42 @@ const ExportEpubModal: React.FC<ExportEpubModalProps> = ({
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.form}>
-            <Pressable
-              accessibilityHint={uri || undefined}
-              accessibilityLabel={getString(
-                'novelScreen.exportEpubModal.selectFolder',
-              )}
-              accessibilityRole="button"
-              onPress={() => void openFolderPicker()}
-            >
-              <TextInput
-                editable={false}
-                label={getString('novelScreen.exportEpubModal.directory')}
-                mode="outlined"
-                pointerEvents="none"
-                placeholder={getString(
+            {Platform.OS === 'ios' ? (
+              <Text style={{ color: theme.onSurfaceVariant, marginBottom: 8 }}>
+                {getString('novelScreen.exportEpubModal.selectFolder')}
+              </Text>
+            ) : (
+              <Pressable
+                accessibilityHint={uri || undefined}
+                accessibilityLabel={getString(
                   'novelScreen.exportEpubModal.selectFolder',
                 )}
-                right={
-                  <TextInput.Icon
-                    accessibilityLabel={getString(
-                      'novelScreen.exportEpubModal.selectFolder',
-                    )}
-                    forceTextInputFocus={false}
-                    icon="folder-outline"
-                    onPress={() => void openFolderPicker()}
-                  />
-                }
-                theme={{ colors: { ...theme } }}
-                value={uri}
-              />
-            </Pressable>
+                accessibilityRole="button"
+                onPress={() => void openFolderPicker()}
+              >
+                <TextInput
+                  editable={false}
+                  label={getString('novelScreen.exportEpubModal.directory')}
+                  mode="outlined"
+                  pointerEvents="none"
+                  placeholder={getString(
+                    'novelScreen.exportEpubModal.selectFolder',
+                  )}
+                  right={
+                    <TextInput.Icon
+                      accessibilityLabel={getString(
+                        'novelScreen.exportEpubModal.selectFolder',
+                      )}
+                      forceTextInputFocus={false}
+                      icon="folder-outline"
+                      onPress={() => void openFolderPicker()}
+                    />
+                  }
+                  theme={{ colors: { ...theme } }}
+                  value={uri}
+                />
+              </Pressable>
+            )}
             <View>
               <TextInput
                 autoCapitalize="none"
