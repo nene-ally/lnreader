@@ -7,7 +7,10 @@ public class NativeBackgroundTasksModule: Module {
     Name("NativeBackgroundTasks")
 
     AsyncFunction("enqueue") { (type: String, payload: String, title: String, description: String, allowsDuplicates: Bool, queueName: String) -> String in
-      throw NSError(domain: "NativeBackgroundTasks", code: 1, userInfo: [NSLocalizedDescriptionKey: "Background tasks not available on iOS"])
+      // Fake id: the TS layer runs the task in the foreground on iOS
+      // (see BackgroundTaskQueue). Returning an id keeps queue bookkeeping
+      // consistent without a real scheduler.
+      return "ios-\(Int(Date().timeIntervalSince1970 * 1000))"
     }
 
     AsyncFunction("getTasks") { () -> [[String: Any]] in
