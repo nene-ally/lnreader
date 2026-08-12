@@ -38,7 +38,7 @@ import {
   READER_JS_SEARCH,
   READER_JS_INDEX,
   READER_JS_TEXTREMOVER,
-} from '../../generated/readerInlineAssets';
+} from '../../../generated/readerInlineAssets';
 import { useChapterContext } from '../ChapterContext';
 import { ReaderSearchResult } from '../types';
 import { useTtsSession } from '../hooks/useTtsSession';
