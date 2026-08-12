@@ -1,9 +1,11 @@
 import { Alert, Platform, ToastAndroid } from 'react-native';
 
 /**
- * Lightweight feedback. Android: native toast. iOS: ToastAndroid is a no-op,
- * so show a brief non-blocking banner via Alert only for error-style toasts
- * (marked with showErrorToast), and log everything else in dev.
+ * Lightweight feedback.
+ * - Android: native toast.
+ * - iOS: ToastAndroid is a no-op and there is no built-in toast, so use
+ *   Alert.alert — without visible feedback every operation looked dead
+ *   (downloads, exports, imports silently "did nothing").
  */
 export const showToast = (...message: string[]) => {
   const text = message.join(' ');
@@ -11,10 +13,7 @@ export const showToast = (...message: string[]) => {
     ToastAndroid.show(text, ToastAndroid.SHORT);
     return;
   }
-  if (__DEV__) {
-    // eslint-disable-next-line no-console
-    console.log('Toast: ', text);
-  }
+  Alert.alert(text);
 };
 
 /** Error feedback that must be visible on every platform. */

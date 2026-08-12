@@ -111,6 +111,10 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       return;
     }
 
+    // Immediate visible feedback: the export runs as a background task, so
+    // without this the tap looks dead until it finishes (or fails silently).
+    showToast(getString('novelScreen.epub.preparingExport'));
+
     try {
       const chapters = await getNovelDownloadedChapters(
         novel.id,
