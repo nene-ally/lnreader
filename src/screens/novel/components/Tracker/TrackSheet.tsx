@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Portal } from 'react-native-paper';
 
 import BottomSheet from '@components/BottomSheet/BottomSheet';
@@ -8,6 +8,7 @@ import { TrackerName, UserListStatus } from '@services/Trackers';
 import { NovelInfo } from '@database/types';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { TrackerMetadata } from '@hooks/persisted/useTracker';
+import { showErrorToast } from '@utils/showToast';
 import { getStatusLabel, getTrackerIcon } from './constants';
 import { AddTrackingCard, TrackedItemCard } from './TrackerCards';
 import TrackSearchDialog from './TrackSearchDialog';
@@ -105,13 +106,13 @@ const TrackSheet: React.FC<TrackSheetProps> = ({ bottomSheetRef, novel }) => {
       if (!activeTracker) return;
 
       if (!newChapters) {
-        ToastAndroid.show('Enter a valid number', ToastAndroid.SHORT);
+        showErrorToast('Enter a valid number');
         return;
       }
 
       const newProgress = Number(newChapters);
       if (isNaN(newProgress)) {
-        ToastAndroid.show('Enter a valid number', ToastAndroid.SHORT);
+        showErrorToast('Enter a valid number');
         return;
       }
 

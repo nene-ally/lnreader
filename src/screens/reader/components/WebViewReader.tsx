@@ -341,7 +341,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
               <style>${READER_CSS_TTS}</style>
               <style>
               :root {
-                --StatusBar-currentHeight: ${StatusBar.currentHeight}px;
+                --StatusBar-currentHeight: ${StatusBar.currentHeight ?? 0}px;
                 --readerSettings-theme: ${initialReaderSettings.theme};
                 --readerSettings-padding: ${initialReaderSettings.padding}px;
                 --readerSettings-textSize: ${initialReaderSettings.textSize}px;

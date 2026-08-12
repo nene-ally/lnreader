@@ -4,7 +4,7 @@ import NativeBackgroundTasks from '@modules/native-background-tasks';
 import { getString } from '@i18n/translations';
 import { askForPostNotificationsPermission } from '@utils/askForPostNoftificationsPermission';
 import { getMMKVObject, setMMKVObject } from '@utils/mmkv/mmkv';
-import { showToast } from '@utils/showToast';
+import { showErrorToast, showToast } from '@utils/showToast';
 import type {
   BackgroundTask,
   BackgroundTaskMetadata,
@@ -210,7 +210,13 @@ export class BackgroundTaskQueue {
       // ponytail: no BGTaskScheduler integration; tasks run while the app is
       // open. Add BGTaskScheduler if background downloads are required.
       if (Platform.OS === 'ios') {
-        void this.run(id, task);
+        this.run(id, task).catch(error => {
+          showErrorToast(
+            getString('notifications.taskFailed', {
+              error: error instanceof Error ? error.message : String(error),
+            }),
+          );
+        });
       }
     } catch (error) {
       this.store(this.getSnapshot().filter(item => item.id !== pending.id));

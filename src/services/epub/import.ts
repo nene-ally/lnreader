@@ -16,7 +16,7 @@ import type {
 import NativeFile from '@modules/native-file';
 import NativeZipArchive from '@modules/native-zip-archive';
 import { getEpub } from '@modules/nitro-epub';
-import { showToast } from '@utils/showToast';
+import { showErrorToast } from '@utils/showToast';
 
 const decodePath = (path: string) => {
   try {
@@ -200,7 +200,7 @@ export const importEpub = async (
       }
     }
   } catch (error) {
-    showToast(
+    showErrorToast(
       getString('advancedSettingsScreen.importFailed'),
       (error as Error).message,
     );

@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { useAppSettings, useTheme } from '@hooks/persisted';
 import { Appbar, List, SafeAreaView } from '@components';
 import { useBoolean } from '@hooks';
@@ -151,12 +152,14 @@ const BackupSettings = ({ navigation }: BackupSettingsScreenProps) => {
             onPress={openSelfHostModal}
           />
 
-          <List.Item
-            title={getString('backupScreen.googeDrive')}
-            description={getString('backupScreen.googeDriveDesc')}
-            theme={theme}
-            onPress={openGoogleDriveModal}
-          />
+          {Platform.OS === 'android' ? (
+            <List.Item
+              title={getString('backupScreen.googeDrive')}
+              description={getString('backupScreen.googeDriveDesc')}
+              theme={theme}
+              onPress={openGoogleDriveModal}
+            />
+          ) : null}
           <List.SubHeader theme={theme}>
             {getString('backupScreen.localBackup')}
           </List.SubHeader>

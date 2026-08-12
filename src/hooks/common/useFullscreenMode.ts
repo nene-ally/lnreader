@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import { Platform, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
   useChapterGeneralSettings,
@@ -51,7 +51,10 @@ const useFullscreenMode = () => {
   useEffect(() => {
     const unsubscribe = addListener('beforeRemove', () => {
       StatusBar.setHidden(false);
-      NavigationBar.setVisibilityAsync('visible');
+      if (Platform.OS === 'android') {
+        // Android-only module; throws UnavailabilityError elsewhere.
+        NavigationBar.setVisibilityAsync('visible').catch(() => undefined);
+      }
       setStatusBarColor(theme);
     });
 

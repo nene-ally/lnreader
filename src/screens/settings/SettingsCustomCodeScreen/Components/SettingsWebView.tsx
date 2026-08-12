@@ -168,7 +168,7 @@ const SettingsWebView = () => {
   <style>${READER_CSS_TTS}</style>
   <style>
     :root {
-      --StatusBar-currentHeight: ${StatusBar.currentHeight};
+      --StatusBar-currentHeight: ${StatusBar.currentHeight ?? 0};
       --readerSettings-theme: ${settings.theme};
       --readerSettings-padding: ${settings.padding}px;
       --readerSettings-textSize: ${settings.textSize}px;
