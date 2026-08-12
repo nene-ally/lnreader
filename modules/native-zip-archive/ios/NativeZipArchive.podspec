@@ -15,6 +15,7 @@ Pod::Spec.new do |s|
   s.source_files = "**/*.{h,m,mm,swift}"
   s.pod_target_xcconfig = {
     'OTHER_LDFLAGS' => '-larchive',
+    'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libarchive',
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17'
   }
 end
