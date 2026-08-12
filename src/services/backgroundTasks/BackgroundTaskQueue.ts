@@ -171,6 +171,10 @@ export class BackgroundTaskQueue {
     const current = this.getSnapshot();
     if (
       !allowsDuplicateTask(task) &&
+      // iOS: tasks run in the foreground and finish quickly; a stale
+      // 'running' entry (e.g. from a previous session that hung on the share
+      // sheet) must not silently block a new identical task.
+      Platform.OS !== 'ios' &&
       current.some(item => item.task.name === task.name)
     ) {
       return;

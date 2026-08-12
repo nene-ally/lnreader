@@ -8,7 +8,9 @@ public class NativeFileModule: Module {
 
     AsyncFunction("shareFile") { (filePath: String, promise: Promise) in
       // iOS share sheet (Save to Files / AirDrop / etc). Android uses SAF.
-      DispatchQueue.main.async {
+      // Delay past any dismissing modal: presenting while another VC is
+      // mid-dismiss is silently dropped by UIKit.
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
         guard let top = NativeFileModule.topViewController() else {
           promise.reject("NO_VIEW_CONTROLLER", "No active view controller")
           return
@@ -26,12 +28,26 @@ public class NativeFileModule: Module {
         controller.completionWithItemsHandler = { _, _, _, _ in
           promise.resolve()
         }
+        // If UIKit drops the present (rare), the promise would never settle
+        // and the export task would hang. Timeout: the file already lives in
+        // Documents (visible in the Files app), so resolve anyway.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
+          promise.resolve()
+        }
         if let popover = controller.popoverPresentationController {
           popover.sourceView = top.view
           popover.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
           popover.permittedArrowDirections = []
         }
-        top.present(controller, animated: true)
+        // If something is still presented (e.g. the export dialog finishing
+        // its dismiss animation), UIKit drops the present — retry once.
+        if top.presentedViewController != nil {
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            top.present(controller, animated: true)
+          }
+        } else {
+          top.present(controller, animated: true)
+        }
       }
     }
 
