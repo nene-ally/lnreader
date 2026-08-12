@@ -25,6 +25,20 @@ import {
 import { getBatteryLevel } from 'react-native-device-info';
 import { PLUGIN_STORAGE } from '@utils/Storages';
 import { getAssetsUriPrefix } from '@utils/readerAssets';
+import {
+  READER_CSS_INDEX,
+  READER_CSS_PAGEREADER,
+  READER_CSS_TOOLWRAPPER,
+  READER_CSS_TTS,
+  READER_JS_POLYFILL_ONSCROLLEND,
+  READER_JS_ICONS,
+  READER_JS_VAN,
+  READER_JS_TEXT_VIBE,
+  READER_JS_CORE,
+  READER_JS_SEARCH,
+  READER_JS_INDEX,
+  READER_JS_TEXTREMOVER,
+} from '../../generated/readerInlineAssets';
 import { useChapterContext } from '../ChapterContext';
 import { ReaderSearchResult } from '../types';
 import { useTtsSession } from '../hooks/useTtsSession';
@@ -311,15 +325,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
     // eslint-disable-next-line react-hooks/refs
     const isNextChapterScreenVisible = nextChapterScreenVisible.current;
     return {
-      // iOS WKWebView rejects file:// subresource loads (css/fonts) unless the
-      // page has a file:// baseUrl granting read access. For downloaded
-      // chapters (no remote base), point at the in-bundle reader assets dir.
-      baseUrl:
-        Platform.OS === 'ios' && chapter.isDownloaded
-          ? getAssetsUriPrefix() + '/'
-          : !chapter.isDownloaded
-            ? plugin?.site
-            : undefined,
+      // Keep the chapter's remote base so relative image URLs resolve.
+      baseUrl: !chapter.isDownloaded ? plugin?.site : undefined,
       headers: plugin?.imageRequestInit?.headers,
       method: plugin?.imageRequestInit?.method,
       body: plugin?.imageRequestInit?.body,
@@ -328,10 +335,10 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
           <html dir="${readerDir}">
             <head>
               <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-              <link rel="stylesheet" href="${assetsUriPrefix}/css/index.css">
-              <link rel="stylesheet" href="${assetsUriPrefix}/css/pageReader.css">
-              <link rel="stylesheet" href="${assetsUriPrefix}/css/toolWrapper.css">
-              <link rel="stylesheet" href="${assetsUriPrefix}/css/tts.css">
+              <style>${READER_CSS_INDEX}</style>
+              <style>${READER_CSS_PAGEREADER}</style>
+              <style>${READER_CSS_TOOLWRAPPER}</style>
+              <style>${READER_CSS_TTS}</style>
               <style>
               :root {
                 --StatusBar-currentHeight: ${StatusBar.currentHeight}px;
@@ -412,14 +419,14 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({
                   },
                 })}
               </script>
-              <script src="${assetsUriPrefix}/js/polyfill-onscrollend.js"></script>
-              <script src="${assetsUriPrefix}/js/icons.js"></script>
-              <script src="${assetsUriPrefix}/js/van.js"></script>
-              <script src="${assetsUriPrefix}/js/text-vibe.js"></script>
-              <script src="${assetsUriPrefix}/js/core.js"></script>
-              <script src="${assetsUriPrefix}/js/search.js"></script>
-              <script src="${assetsUriPrefix}/js/index.js"></script>
-              <script src="${assetsUriPrefix}/js/textRemover.js"></script>
+              <script>${READER_JS_POLYFILL_ONSCROLLEND}</script>
+              <script>${READER_JS_ICONS}</script>
+              <script>${READER_JS_VAN}</script>
+              <script>${READER_JS_TEXT_VIBE}</script>
+              <script>${READER_JS_CORE}</script>
+              <script>${READER_JS_SEARCH}</script>
+              <script>${READER_JS_INDEX}</script>
+              <script>${READER_JS_TEXTREMOVER}</script>
               <script src="${pluginCustomJS}"></script>
               <script id="ln-custom-js">
               function fn(){

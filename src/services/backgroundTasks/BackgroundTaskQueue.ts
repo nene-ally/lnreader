@@ -1,4 +1,4 @@
-import { DeviceEventEmitter } from 'react-native';
+import { DeviceEventEmitter, Platform } from 'react-native';
 
 import NativeBackgroundTasks from '@modules/native-background-tasks';
 import { getString } from '@i18n/translations';
@@ -204,6 +204,13 @@ export class BackgroundTaskQueue {
         showToast(
           getString('notifications.taskQueued', { task: pending.meta.name }),
         );
+      }
+      // iOS has no background-task scheduler: the native enqueue is a no-op
+      // that only records the queue. Run the task in the foreground instead.
+      // ponytail: no BGTaskScheduler integration; tasks run while the app is
+      // open. Add BGTaskScheduler if background downloads are required.
+      if (Platform.OS === 'ios') {
+        void this.run(id, task);
       }
     } catch (error) {
       this.store(this.getSnapshot().filter(item => item.id !== pending.id));

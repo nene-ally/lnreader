@@ -4,6 +4,17 @@ import WebView from 'react-native-webview';
 import color from 'color';
 import { getString } from '@i18n/translations';
 import { MMKVStorage } from '@utils/mmkv/mmkv';
+import {
+  READER_CSS_INDEX,
+  READER_CSS_PAGEREADER,
+  READER_CSS_TOOLWRAPPER,
+  READER_CSS_TTS,
+  READER_JS_ICONS,
+  READER_JS_VAN,
+  READER_JS_TEXT_VIBE,
+  READER_JS_CORE,
+  READER_JS_INDEX,
+} from '../../../../generated/readerInlineAssets';
 import { getAssetsUriPrefix } from '@utils/readerAssets';
 import {
   CHAPTER_GENERAL_SETTINGS,
@@ -151,6 +162,10 @@ const SettingsWebView = () => {
 
   const webViewCSS = useMemo(
     () => `
+  <style>${READER_CSS_INDEX}</style>
+  <style>${READER_CSS_PAGEREADER}</style>
+  <style>${READER_CSS_TOOLWRAPPER}</style>
+  <style>${READER_CSS_TTS}</style>
   <style>
     :root {
       --StatusBar-currentHeight: ${StatusBar.currentHeight};
@@ -180,10 +195,6 @@ const SettingsWebView = () => {
       src: url("${assetsUriPrefix}/fonts/${settings.fontFamily}.ttf");
     }
     </style>
-    <link rel="stylesheet" href="${assetsUriPrefix}/css/index.css">
-    <link rel="stylesheet" href="${assetsUriPrefix}/css/pageReader.css">
-    <link rel="stylesheet" href="${assetsUriPrefix}/css/toolWrapper.css">
-    <link rel="stylesheet" href="${assetsUriPrefix}/css/tts.css">
     <style>
     ${customCSS}
   </style>
@@ -282,11 +293,11 @@ const SettingsWebView = () => {
                                 },
                               })}
                             </script>
-                            <script src="${assetsUriPrefix}/js/icons.js"></script>
-                            <script src="${assetsUriPrefix}/js/van.js"></script>
-                            <script src="${assetsUriPrefix}/js/text-vibe.js"></script>
-                            <script src="${assetsUriPrefix}/js/core.js"></script>
-                            <script src="${assetsUriPrefix}/js/index.js"></script>
+                            <script>${READER_JS_ICONS}</script>
+                            <script>${READER_JS_VAN}</script>
+                            <script>${READER_JS_TEXT_VIBE}</script>
+                            <script>${READER_JS_CORE}</script>
+                            <script>${READER_JS_INDEX}</script>
                             <script>
                             ${customJS}
                               async function fn(){

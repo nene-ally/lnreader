@@ -30,6 +30,9 @@ jobs:
       - name: Remove dev-only dependencies for production build
         run: pnpm remove expo-dev-client
 
+      - name: Regenerate inline reader assets
+        run: node scripts/generate-reader-inline-assets.cjs
+
       - name: Generate env file
         run: node scripts/generate-env-file.cjs --build-type Release
 
