@@ -220,7 +220,7 @@ export class BackgroundTaskQueue {
       }
     } catch (error) {
       this.store(this.getSnapshot().filter(item => item.id !== pending.id));
-      showToast(
+      showErrorToast(
         `${pending.meta.name}: ${
           error instanceof Error ? error.message : String(error)
         }`,

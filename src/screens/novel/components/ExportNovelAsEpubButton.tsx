@@ -8,7 +8,7 @@ import NativeFile from '@modules/native-file';
 import { NovelInfo } from '@database/types';
 import { useChapterReaderSettings, useTheme } from '@hooks/persisted';
 import { useBoolean } from '@hooks/index';
-import { showToast } from '@utils/showToast';
+import { showErrorToast, showToast } from '@utils/showToast';
 import { NOVEL_STORAGE } from '@utils/Storages';
 import { getString } from '@i18n/translations';
 import { getNovelDownloadedChapters } from '@database/queries/ChapterQueries';
@@ -107,7 +107,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
     endChapter?: number,
   ) => {
     if (!novel) {
-      showToast(getString('novelScreen.epub.noNovelSelected'));
+      showErrorToast(getString('novelScreen.epub.noNovelSelected'));
       return;
     }
 
@@ -119,7 +119,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
       );
 
       if (chapters.length === 0) {
-        showToast(getString('novelScreen.epub.noDownloadedChapters'));
+        showErrorToast(getString('novelScreen.epub.noDownloadedChapters'));
         return;
       }
 
@@ -177,7 +177,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
         },
       });
     } catch (error) {
-      showToast(
+      showErrorToast(
         getString('novelScreen.epub.exportFailed', {
           error: error instanceof Error ? error.message : String(error),
         }),
