@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 120
 
     steps:
       - name: Checkout
@@ -26,6 +26,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Remove dev-only dependencies for production build
         run: pnpm remove expo-dev-client
