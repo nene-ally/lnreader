@@ -1,8 +1,18 @@
 import ExpoModulesCore
 import Foundation
 
-// Imported via module map (NativeZipArchiveHelper.h), no bridging header.
-import NativeZipArchiveHelper
+// C functions from NativeZipArchiveHelper.mm — declared directly so no
+// bridging header or module map is needed (both are unsupported with
+// Swift static libraries in framework targets).
+@_silgen_name("NativeZipArchiveUnzipFile")
+private func NativeZipArchiveUnzipFile(
+  _ zipPath: NSString, _ destDir: NSString, _ error: UnsafeMutablePointer<NSError?>
+) -> ObjCBool
+
+@_silgen_name("NativeZipArchiveCreateZip")
+private func NativeZipArchiveCreateZip(
+  _ zipPath: NSString, _ srcDir: NSString, _ error: UnsafeMutablePointer<NSError?>
+) -> ObjCBool
 
 public class NativeZipArchiveModule: Module {
   public func definition() -> ModuleDefinition {
@@ -12,8 +22,8 @@ public class NativeZipArchiveModule: Module {
       do {
         try FileManager.default.createDirectory(atPath: distDirPath, withIntermediateDirectories: true)
         var error: NSError?
-        let ok = NativeZipArchiveUnzipFile(sourceFilePath, distDirPath, &error)
-        if ok {
+        let ok = NativeZipArchiveUnzipFile(sourceFilePath as NSString, distDirPath as NSString, &error)
+        if ok.boolValue {
           promise.resolve()
         } else {
           promise.reject("UNZIP_FAILED", error?.localizedDescription ?? "unzip failed")
@@ -28,8 +38,8 @@ public class NativeZipArchiveModule: Module {
         try? FileManager.default.removeItem(atPath: zipFilePath)
       }
       var error: NSError?
-      let ok = NativeZipArchiveCreateZip(zipFilePath, sourceDirPath, &error)
-      if ok {
+      let ok = NativeZipArchiveCreateZip(zipFilePath as NSString, sourceDirPath as NSString, &error)
+      if ok.boolValue {
         promise.resolve()
       } else {
         promise.reject("ZIP_FAILED", error?.localizedDescription ?? "zip failed")

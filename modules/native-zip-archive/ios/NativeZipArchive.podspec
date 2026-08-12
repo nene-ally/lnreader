@@ -13,10 +13,6 @@ Pod::Spec.new do |s|
   s.dependency 'ExpoModulesCore'
 
   s.source_files = "**/*.{h,m,mm,swift}"
-  s.public_header_files = "NativeZipArchiveHelper.h"
-  # Module map so Swift can `import NativeZipArchiveHelper` (no bridging header —
-  # bridging headers are unsupported in framework targets).
-  s.module_map = "module.modulemap"
   s.pod_target_xcconfig = {
     'OTHER_LDFLAGS' => '-larchive',
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17'
