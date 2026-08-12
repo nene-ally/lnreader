@@ -128,10 +128,7 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
         if (Platform.OS === 'ios') {
           // iOS: no folder picker — export to Documents, then the share sheet
           // pops (see export.ts) so the user can Save to Files.
-          resolvedDestinationUri = await NativeFile.createDocument(
-            `${fileName}.epub`,
-            'application/epub+zip',
-          );
+          resolvedDestinationUri = NativeFile.DocumentDirectoryPath;
         } else {
           const selectedFolder = await NativeFile.pickDirectory();
           resolvedDestinationUri = selectedFolder.uri;
