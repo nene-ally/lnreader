@@ -401,6 +401,28 @@ class NativeFileModule : Module() {
             )
         }
 
+        AsyncFunction("shareFile") { filePath: String, promise: Promise ->
+            val uri = runCatching {
+                FileProvider.getUriForFile(
+                    appContext.reactContext,
+                    "${appContext.reactContext.packageName}.fileprovider",
+                    File(filePath),
+                )
+            }.getOrElse {
+                promise.reject("SHARE_FAILED", it.message)
+                return@AsyncFunction
+            }
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "*/*"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            appContext.reactContext.startActivity(
+                Intent.createChooser(intent, "Share").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+            promise.resolve()
+        }
+
         AsyncFunction("pickDocument") { mimeType: String, promise: Promise ->
             launchDocumentIntent(
                 Intent(Intent.ACTION_OPEN_DOCUMENT).apply {

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Portal } from 'react-native-paper';
-import { StatusBar } from 'react-native';
+import { Platform, StatusBar } from 'react-native';
 
 import { type EpubExportChapter } from '@modules/nitro-epub';
 import NativeFile from '@modules/native-file';
@@ -125,8 +125,17 @@ const ExportNovelAsEpubButton: React.FC<ExportNovelAsEpubButtonProps> = ({
 
       let resolvedDestinationUri = destinationUri;
       if (!resolvedDestinationUri) {
-        const selectedFolder = await NativeFile.pickDirectory();
-        resolvedDestinationUri = selectedFolder.uri;
+        if (Platform.OS === 'ios') {
+          // iOS: no folder picker — export to Documents, then the share sheet
+          // pops (see export.ts) so the user can Save to Files.
+          resolvedDestinationUri = await NativeFile.createDocument(
+            `${fileName}.epub`,
+            'application/epub+zip',
+          );
+        } else {
+          const selectedFolder = await NativeFile.pickDirectory();
+          resolvedDestinationUri = selectedFolder.uri;
+        }
       }
 
       const epubChapters: EpubExportChapter[] = chapters.map(

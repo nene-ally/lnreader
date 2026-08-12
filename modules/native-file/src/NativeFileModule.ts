@@ -21,6 +21,7 @@ type NativeFileModule = {
   ExternalDirectoryPath: string;
   ExternalCachesDirectoryPath: string;
   createDocument(filename: string, mimeType: string): Promise<string>;
+  shareFile(filePath: string): Promise<void>;
   pickDocument(mimeType: string): Promise<string>;
   pickDirectory(): Promise<DirectorySelection>;
   writeFile(path: string, content: string): Promise<void>;

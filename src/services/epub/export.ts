@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import NativeFile from '@modules/native-file';
 import { getEpub } from '@modules/nitro-epub';
 
@@ -88,6 +89,13 @@ export const exportEpub = async (
     );
     if (copyResult.size <= 0) {
       throw new Error('Exported EPUB is empty');
+    }
+
+    // iOS: pop the share sheet so the user can Save to Files / AirDrop.
+    // Android uses SAF (user already picked the destination).
+    if (Platform.OS === 'ios') {
+      const filePath = copyResult.uri.replace(/^file:\/\//, '');
+      await NativeFile.shareFile(filePath);
     }
 
     const completionText = getString('novelScreen.epub.exportSuccess', {

@@ -6,6 +6,28 @@ public class NativeFileModule: Module {
   public func definition() -> ModuleDefinition {
     Name("NativeFile")
 
+    AsyncFunction("shareFile") { (filePath: String, promise: Promise) in
+      // iOS share sheet (Save to Files / AirDrop / etc). Android uses SAF.
+      DispatchQueue.main.async {
+        guard let top = NativeFileModule.topViewController() else {
+          promise.reject("NO_VIEW_CONTROLLER", "No active view controller")
+          return
+        }
+        let url = URL(fileURLWithPath: filePath)
+        let controller = UIActivityViewController(
+          activityItems: [url], applicationActivities: nil)
+        controller.completionWithItemsHandler = { _, _, _, _ in
+          promise.resolve()
+        }
+        if let popover = controller.popoverPresentationController {
+          popover.sourceView = top.view
+          popover.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
+          popover.permittedArrowDirections = []
+        }
+        top.present(controller, animated: true)
+      }
+    }
+
     AsyncFunction("createDocument") { (filename: String, mimeType: String) -> String in
       // iOS has no SAF "create file at user-chosen location" flow; the backup
       // task writes asynchronously to the returned path, so it must be
